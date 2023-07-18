@@ -1,51 +1,22 @@
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, render_template, request, jsonify
+import clusterization
 
 app = Flask(__name__)
 
 
-@app.route('/upload', methods=['GET', 'POST'])
-def upload_json():
-    if request.method == 'POST':
-        # Verifica se foi enviado um arquivo JSON
-        if 'file' not in request.files:
-            return jsonify({'error': 'Nenhum arquivo enviado.'}), 400
+@app.route("/")
+def home():
+    return render_template("index.html")
 
-        file = request.files['file']
-
-        # Verifica se o arquivo tem um nome
-        if file.filename == '':
-            return jsonify({'error': 'O arquivo não tem um nome.'}), 400
-
-        # Verifica se o arquivo é um JSON
-        if file.filename.endswith('.json'):
-            try:
-                # Faz a leitura do arquivo JSON
-                data = file.read()
-
-                # Aqui você pode fazer qualquer processamento necessário nos dados
-                json_content = data.decode('utf-8')
-
-                return render_template('result_json.html', json_content=json_content)
-
-            except Exception as e:
-                return jsonify({'error': str(e)}), 500
-
-        return jsonify({'error': 'O arquivo enviado não é um JSON.'}), 400
-
-    return render_template('upload.html')
-
-
-@app.route('/input', methods = ['GET','POST'])
-def input_values():
-    if request.method == 'POST':
-        class_value = request.form['class']
-        question_value = request.form['question']
-        correct_value = request.form['correct']
-        time_value = request.form['time']
-
-        return f"Valores inseridos: Class={class_value}, Question={question_value}, Correct={correct_value}, Time={time_value}"
-
-    return render_template('input.html')
+@app.route('/predict', methods=['POST'])
+def predict():
+    json_data = request.form.get('content')
+    df = clusterization.json_to_dataframe(json_data)
+    clusterization.insert_dataframe_to_postgresql(df)
+    data = clusterization.execute_query()
+    clusterization.clusterizar_dados(data)
+    prediction = clusterization.add_cluster_data_to_hits(json_data, data)
+    return render_template("index.html", prediction=jsonify(prediction), json_data=json_data)
 
 if __name__ == '__main__':
     app.run(debug=True)
