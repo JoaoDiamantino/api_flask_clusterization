@@ -1,8 +1,6 @@
 import json
-import pandas as pd
 import psycopg2
 import pandas as pd
-import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 from scipy.spatial.distance import cdist
@@ -11,23 +9,32 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 # Acessar banco de dados
-def execute_query():
+import pandas as pd
+import psycopg2
+
+
+def execute_query(df):
     # Configuração de conexão
     connection_string = 'postgres://tabuada_cluster_teste_user:hm2itcVVmeYdya6KoFeisFXbqTpUBua7@dpg-ciolr45gkuvh5gh8pst0-a.oregon-postgres.render.com/tabuada_cluster_teste'
-    # Consulta SQL
-    query = 'SELECT * FROM tabuada'
 
     conn = psycopg2.connect(connection_string)
     cur = conn.cursor()
 
-    cur.execute(query)
-    columns = [desc[0] for desc in cur.description]
-    rows = cur.fetchall()
+    filtered_rows = []
+    for _, row in df.iterrows():
+        class_value = row['class']
+        question_value = row['question']
+
+        query = f"SELECT * FROM tabuada WHERE class = {class_value} AND question = '{question_value}'"
+        cur.execute(query)
+        rows = cur.fetchall()
+        filtered_rows.extend(rows)
 
     cur.close()
     conn.close()
 
-    data = pd.DataFrame(rows, columns=columns)
+    columns = [desc[0] for desc in cur.description]
+    data = pd.DataFrame(filtered_rows, columns=columns)
     return data
 
 
@@ -196,23 +203,3 @@ def add_cluster_data_to_hits(json_data, data_clustered):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Chamada da função para executar a consulta
-data = execute_query()
