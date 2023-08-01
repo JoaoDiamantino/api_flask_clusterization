@@ -144,7 +144,7 @@ def insert_dataframe_to_postgresql(df):
 # Atualizar Json
 def add_cluster_data_to_hits(json_data, data_clustered):
     # Carregar o JSON em uma estrutura de dados
-    data = json.loads(json_data)
+    data = json_data
 
     # Acessar a lista de hits
     hits = data['hits']
