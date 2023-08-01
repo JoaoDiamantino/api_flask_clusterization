@@ -27,7 +27,7 @@ def predict_api():
     data = clusterization.execute_query(df)
     clusterization.clusterizar_dados(data)
     prediction = clusterization.add_cluster_data_to_hits(json_data, data)
-    return jsonify({'prediction': prediction, 'json_data': json_data})  # Return prediction
+    return {'prediction': prediction, 'json_data': json_data}  # Return prediction
 
 if __name__ == '__main__':
     app.run(debug=True)
