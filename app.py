@@ -22,6 +22,12 @@ def predict():
 @app.route('/api/predict', methods=['POST'])
 def predict_api():
     json_data = request.get_json(force=True)  # Get data posted as a json
+    if isinstance(json_data, str):
+        # Se json_data é uma string, converta-a em um dicionário usando json.loads
+        json_data = json.loads(json_data)
+    else:
+        # Se json_data já é um dicionário, não é necessário fazer a conversão
+        json_data = json_data
     df = clusterization.json_to_dataframe(json_data)
     clusterization.insert_dataframe_to_postgresql(df)
     data = clusterization.execute_query(df)
