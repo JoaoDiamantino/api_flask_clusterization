@@ -104,6 +104,7 @@ def clusterizar_dados(data):
 
 # Transformar o Json em DataFrame
 def json_to_dataframe(json_data):
+    data = json_data
     hits = data["hits"]
 
     df_data = []
